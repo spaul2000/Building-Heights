@@ -51,23 +51,25 @@ def read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_t
     
     return processed_data, mask_data, profiles
 
-def save_cropped_tiffs(data_list, mask_list, data_output_folder, mask_output_folder, prefix="cropped"):
+def save_cropped_tiffs(data_list, mask_list, data_output_folder, profiles, prefix="cropped"):
     """Save each data array in the list as a GeoTIFF file using the provided profiles."""
-    if not os.path.exists(data_output_folder):
-        os.makedirs(data_output_folder)
-    if not os.path.exists(mask_output_folder):
-        os.makedirs(mask_output_folder)
+    images_path = os.path.join(data_output_folder,'images')
+    masks_path = os.path.join(data_output_folder, 'masks')
+    if not os.path.exists(images_path):
+        os.makedirs(images_path)
+    if not os.path.exists(masks_path):
+        os.makedirs(masks_path)
         
     saved_files = []
     mask_files = []
     
     for i, (data, mask, profile) in enumerate(zip(data_list, mask_list, profiles)):
-        output_path = os.path.join(data_output_folder, f"{prefix}_{i}.tif")
+        output_path = os.path.join(images_path, f"{prefix}_{i}.tif")
         with rasterio.open(output_path, "w", **profile) as dst:
             dst.write(data.astype(np.float32))
         saved_files.append(output_path)
         
-        mask_path = os.path.join(mask_output_folder, f"{prefix}_{i}_mask.tif")
+        mask_path = os.path.join(masks_path, f"{prefix}_{i}_mask.tif")
         profile["count"] = 1  # Only one band for mask
         with rasterio.open(mask_path, "w", **profile) as dst:
             dst.write(mask.astype(np.float32))
@@ -79,28 +81,32 @@ def save_filepaths_to_csv(saved_files, mask_files, csv_path):
     """Save the file paths of data and masks to a CSV."""
     with open(csv_path, "w", newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(["Data Filepath", "Mask Filepath"])
+        csv_writer.writerow(["image_filepaths", "mask_filepaths", "split"])
         for data_path, mask_path in zip(saved_files, mask_files):
-            csv_writer.writerow([data_path, mask_path])
+            csv_writer.writerow([data_path, mask_path, 'train'])
 
-bucket_name = 'cs325b-building-height'
-folder_path = 'data/sat_img/tx_sample_gt_2000/'
-bands_to_keep = [1, 2, 15, 16, 17]  
-mask_band = [36]  
-n = 2  # Number of geotiffs to read and preprocess
+def main(bucket_name = 'cs325b-building-height',
+    folder_path = 'data/sat_img/tx_sample_gt_2000/',
+    bands_to_keep = [1, 2, 15, 16, 17],
+    mask_band = [36],
+    n = 2,  # Number of geotiffs to read and preprocess
+    data_output_folder = "/home/spaul/group/data/test"
+    ):
+    # Call the reading and preprocessing function
+    processed_data, mask_data, profiles = read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_to_keep, mask_band)
 
-# Call the reading and preprocessing function
-processed_data, mask_data, profiles = read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_to_keep, mask_band)
+    # Save the processed data to individual GeoTIFF files in local folders
+    saved_files, mask_files = save_cropped_tiffs(processed_data, mask_data, data_output_folder, profiles)
 
-# Save the processed data to individual GeoTIFF files in local folders
-data_output_folder = "./data/mean_crops/data"
-mask_output_folder = "./data/mean_crops/mask"
-saved_files, mask_files = save_cropped_tiffs(processed_data, mask_data, data_output_folder, mask_output_folder)
+    # Save the file paths to a CSV
+    csv_file_path = os.path.join(data_output_folder, 'metadata.csv')
+    save_filepaths_to_csv(saved_files, mask_files, csv_file_path)
 
-# Save the file paths to a CSV
-csv_file_path = "./data/mean_crops/filepaths.csv"
-save_filepaths_to_csv(saved_files, mask_files, csv_file_path)
+    # print the paths of the saved files
+    for file_path, mask_path in zip(saved_files, mask_files):
+        print(file_path, mask_path)
 
-# print the paths of the saved files
-for file_path, mask_path in zip(saved_files, mask_files):
-    print(file_path, mask_path)
+if __name__ == "__main__":
+    main()
+
+
