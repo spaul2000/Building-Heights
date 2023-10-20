@@ -27,12 +27,12 @@ def stitch_crops_together(crop_files):
     return full_image
 
 # Example usage:
-crop_files = [f"./data/mean_crops/cropped_{i}.tif" for i in range(9)]  # Adjust based on your files
+crop_files = [f"./data/mean_crops/mask/cropped_{i}_mask.tif" for i in range(9)]  # Adjust based on your files
 stitched_image = stitch_crops_together(crop_files)
 
 plt.imshow(stitched_image[0])  # Display the first band of the stitched image
 plt.colorbar()
 plt.title("Stitched Image")
 plt.show()
-plt.savefig('preprocess/test.png')
+plt.savefig('preprocess/test_mask.png')
 
