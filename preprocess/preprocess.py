@@ -85,7 +85,7 @@ def save_filepaths_to_csv(saved_files, mask_files, csv_path):
 
 bucket_name = 'cs325b-building-height'
 folder_path = 'data/sat_img/tx_sample_gt_2000/'
-bands_to_keep = [1]  
+bands_to_keep = [1, 2, 15, 16, 17]  
 mask_band = [36]  
 n = 2  # Number of geotiffs to read and preprocess
 
