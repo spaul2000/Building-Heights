@@ -34,16 +34,16 @@ def read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_t
                     cropped_data = selected_bands[:, y:y+128, x:x+128]
                     
                     if cropped_data.shape[1] == 128 and cropped_data.shape[2] == 128:
-                            processed_data.append(cropped_data)
-                            cropped_profile = src.profile.copy()
-                            cropped_profile["height"] = 128
-                            cropped_profile["width"] = 128
-                            cropped_profile["count"] = len(bands_to_keep)
-                            cropped_profile["transform"] = rasterio.windows.transform(
-                                window=rasterio.windows.Window(x, y, 128, 128),
-                                transform=src.transform
-                            )
-                    profiles.append(cropped_profile)
+                        processed_data.append(cropped_data)
+                        cropped_profile = src.profile.copy()
+                        cropped_profile["height"] = 128
+                        cropped_profile["width"] = 128
+                        cropped_profile["count"] = len(bands_to_keep)
+                        cropped_profile["transform"] = rasterio.windows.transform(
+                            window=rasterio.windows.Window(x, y, 128, 128),
+                            transform=src.transform
+                        )
+                        profiles.append(cropped_profile)
     
     return processed_data, profiles
 
