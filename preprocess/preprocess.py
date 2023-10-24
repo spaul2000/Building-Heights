@@ -42,27 +42,48 @@ def get_masks_data_profiles_for_blob(blob, bands_to_keep, mask_band):
     return processed_data, mask_data, profiles
 
 
-def read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_to_keep, mask_band, data_output_folder):
-    """Read and preprocess the first 'n' GeoTIFFs from a folder in GCS."""
+def read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_to_keep, mask_band, data_output_folder, batch_size=20):
+    """Read and preprocess the first 'n' GeoTIFFs from a folder in GCS in batches."""
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     
-    blobs = list(bucket.list_blobs(prefix=folder_path))[:150]
-    saved_files_all = []
-    mask_files_all = []
-    count = 0
+    blobs = list(bucket.list_blobs(prefix=folder_path))[:n]
+    num_batches = len(blobs) // batch_size + (len(blobs) % batch_size > 0)
     
-    for blob in tqdm(blobs, desc="Processing GeoTIFFs"):
-
-        processed_data, mask_data, profiles = get_masks_data_profiles_for_blob(blob, bands_to_keep, mask_band)
-        saved_files, mask_files = save_cropped_tiffs(processed_data, mask_data, data_output_folder, profiles, count)
-        print(saved_files)
-        saved_files_all.extend(saved_files)
-        mask_files_all.extend(mask_files)
-        count += 1
-
     csv_file_path = os.path.join(data_output_folder, 'metadata.csv')
-    save_filepaths_to_csv(saved_files_all, mask_files_all, csv_file_path)
+    
+    # Open the CSV file for writing and create its header
+    with open(csv_file_path, "w", newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(["image_filepaths", "mask_filepaths", "split"])
+
+        # Process batches
+        for batch_index in tqdm(range(num_batches), desc="Processing GeoTIFF batches"):
+            saved_files_batch = []
+            mask_files_batch = []
+            
+            for blob_index in range(batch_index * batch_size, min((batch_index + 1) * batch_size, n)):
+                blob = blobs[blob_index]
+                
+                processed_data, mask_data, profiles = get_masks_data_profiles_for_blob(blob, bands_to_keep, mask_band)
+                saved_files, mask_files = save_cropped_tiffs(processed_data, mask_data, data_output_folder, profiles, blob_index)
+                
+                saved_files_batch.extend(saved_files)
+                mask_files_batch.extend(mask_files)
+
+            # Append the file paths of the current batch to the CSV
+            total_data_points = len(saved_files_batch)
+            split_assignments = ["train"] * int(0.8 * total_data_points) \
+                              + ["val"] * int(0.1 * total_data_points) \
+                              + ["test"] * int(0.1 * total_data_points)
+            random.shuffle(split_assignments)
+            
+            # If the data size is not divisible by 10, append the remaining splits randomly
+            while len(split_assignments) < total_data_points:
+                split_assignments.append(random.choice(["train", "val", "test"]))
+
+            for (data_path, mask_path, split) in zip(saved_files_batch, mask_files_batch, split_assignments):
+                csv_writer.writerow([data_path, mask_path, split])
         
 
 def save_cropped_tiffs(data_list, mask_list, data_output_folder, profiles, prefix):
@@ -91,36 +112,13 @@ def save_cropped_tiffs(data_list, mask_list, data_output_folder, profiles, prefi
         
     return saved_files, mask_files
 
-def save_filepaths_to_csv(saved_files, mask_files, csv_path):
-    """Save the file paths of data and masks to a CSV."""
-    with open(csv_path, "w", newline='') as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(["image_filepaths", "mask_filepaths", "split"])
-        
-        # Determine the total number of data points
-        total_data_points = len(saved_files)
-        
-        # Generate random assignments for each data point to one of the three splits
-        split_assignments = ["train"] * int(0.8 * total_data_points) \
-                          + ["val"] * int(0.1 * total_data_points) \
-                          + ["test"] * int(0.1 * total_data_points)
-                          
-        # Shuffle the split assignments to randomize the order
-        random.shuffle(split_assignments)
-        
-        # If the data size is not divisible by 10, append the remaining splits randomly
-        while len(split_assignments) < total_data_points:
-            split_assignments.append(random.choice(["train", "val", "test"]))
-        
-        for (data_path, mask_path, split) in zip(saved_files, mask_files, split_assignments):
-            csv_writer.writerow([data_path, mask_path, split])
 
 def main(bucket_name = 'cs325b-building-height',
     folder_path = 'data/sat_img/tx_sample_gt_2000/',
     bands_to_keep = [1, 2, 15, 16, 17],
     mask_band = [36],
-    n = 216,  # Number of geotiffs to read and preprocess
-    data_output_folder = "/home/spaul/group/data/test_150"
+    n = 2744,  # Number of geotiffs to read and preprocess
+    data_output_folder = "/home/jmansueto/data/full_tx_2000_mean_vv_vh_rgb"
     ):
     # Call the reading and preprocessing function
     read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_to_keep, mask_band, data_output_folder)
