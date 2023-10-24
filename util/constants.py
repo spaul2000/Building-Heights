@@ -11,7 +11,7 @@ TB_PATH = PROJECT_DIR / "tb"
 EST_DS = {
     'inital_test': (
         # Path to metadata csv
-        '/home/spaul/group/data/test/metadata.csv',
+        '/home/spaul/group/data/test_150/metadata.csv',
         # Number of input bands
         5
     )

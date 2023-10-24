@@ -47,7 +47,7 @@ def read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_t
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     
-    blobs = list(bucket.list_blobs(prefix=folder_path))[:150]
+    blobs = list(bucket.list_blobs(prefix=folder_path))[:10]
     saved_files_all = []
     mask_files_all = []
     count = 0
@@ -120,7 +120,7 @@ def main(bucket_name = 'cs325b-building-height',
     bands_to_keep = [1, 2, 15, 16, 17],
     mask_band = [36],
     n = 216,  # Number of geotiffs to read and preprocess
-    data_output_folder = "/home/spaul/group/data/test_150"
+    data_output_folder = "/home/spaul/group/data/test_10"
     ):
     # Call the reading and preprocessing function
     read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_to_keep, mask_band, data_output_folder)

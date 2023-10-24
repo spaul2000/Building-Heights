@@ -4,6 +4,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from util import constants as C
+from torchsummary import summary
+
 
 
 class SegNet(nn.Module):
@@ -29,6 +31,7 @@ class SegNet(nn.Module):
                                        classes=1,
                                        encoder_name=backbone,
                                        decoder_channels=C.UNET_DECOD)
+            summary(self.model, input_size=(5,128,128))
 
     def forward(self, x):
         return self.model(x)

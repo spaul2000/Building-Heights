@@ -19,12 +19,12 @@ from lightning import (get_task,
 def train(save_dir=str(C.SANDBOX_PATH),
           tb_path=str(C.TB_PATH),
           task='height_estimation',
-          exp_name="inital_model_run",
+          exp_name="deletesoon2",
           seg_architecture="UNet",
           seg_backbone="resnet18",
           seg_dataset="inital_test",
 	      learning_rate=0.0001,
-	      batch_size=16,
+	      batch_size=4,
           loss_fn='MSE',
           optimizer='Adam',  # Options: 'Adam', 'SGD', 'AdamW'
           patience=10,
@@ -48,14 +48,41 @@ def train(save_dir=str(C.SANDBOX_PATH),
     task = get_task(args)
 
     trainer = Trainer(logger=[get_tb_logger(save_dir, exp_name), get_csv_logger(save_dir, exp_name)],
-                      callbacks=[get_early_stop_callback(patience, monitor="train_loss", mode="min"),
-                                 get_ckpt_callback(save_dir, exp_name, monitor="train_loss", mode="min")],
+                      callbacks=[get_early_stop_callback(patience, monitor="val_loss", mode="min"),
+                                 get_ckpt_callback(save_dir, exp_name, monitor="val_loss", mode="min")],
                       log_every_n_steps=1,
-                      max_epochs=20
+                      max_epochs=1000
                      )
     trainer.fit(task)
 
     return trainer.checkpoint_callback.best_model_path
 
+def test(ckpt_path='/home/spaul/group/main/sandbox/real_initial_go/ckpts/model_checkpoint.ckpt',
+         eval_split='test',
+         **kwargs):
+    """
+    Run the testing experiment.
+    Args:
+        ckpt_path: Path for the experiment to load
+        gpus: int. (ie: 2 gpus)
+             OR list to specify which GPUs [0, 1] OR '0,1'
+             OR '-1' / -1 to use all available gpus
+        eval_split: use 'val' or 'test' split
+        eval_target_resolution: desired resolution (in cm) to evaluate
+                                at
+        n_batches_inspect: number of batches to save predictions for
+    Returns:
+        Metrics for the input ckpt evaluated on the specified split
+    """
+    logging.getLogger().setLevel(logging.INFO)
+    task = load_task(
+        ckpt_path,
+        eval_split=eval_split,
+        task="height_estimation",
+        **kwargs
+    )
+    trainer = Trainer()
+    trainer.test(task)
+    return task.eval_results
 if __name__ == "__main__":
     fire.Fire()
