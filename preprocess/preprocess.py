@@ -115,10 +115,10 @@ def save_cropped_tiffs(data_list, mask_list, data_output_folder, profiles, prefi
 
 def main(bucket_name = 'cs325b-building-height',
     folder_path = 'data/sat_img/tx_sample_gt_2000/',
-    bands_to_keep = [1, 2, 15, 16, 17],
+    bands_to_keep = [21, 13, 12, 16, 7],
     mask_band = [36],
-    n = 2744,  # Number of geotiffs to read and preprocess
-    data_output_folder = "/home/jmansueto/data/full_tx_2000_mean_vv_vh_rgb"
+    n = 150,  # Number of geotiffs to read and preprocess
+    data_output_folder = "/home/Duke/data/top_5_band/metadata.csv"
     ):
     # Call the reading and preprocessing function
     read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_to_keep, mask_band, data_output_folder)
