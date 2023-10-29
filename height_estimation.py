@@ -19,7 +19,7 @@ from lightning import (get_task,
 def train(save_dir=str(C.SANDBOX_PATH),
           tb_path=str(C.TB_PATH),
           task='height_estimation',
-          exp_name="deletesoon2",
+          exp_name="full_dataset_baseline_new_loss",
           seg_architecture="UNet",
           seg_backbone="resnet18",
           seg_dataset="inital_test",
@@ -27,7 +27,7 @@ def train(save_dir=str(C.SANDBOX_PATH),
 	      batch_size=4,
           loss_fn='MSE',
           optimizer='Adam',  # Options: 'Adam', 'SGD', 'AdamW'
-          patience=10,
+          patience=5,
          ):
     """
     Run the training experiment.
@@ -44,7 +44,7 @@ def train(save_dir=str(C.SANDBOX_PATH),
     logging.getLogger().setLevel(logging.INFO)
 
     args = Args(locals())
-    # init_exp_folder(args)
+    init_exp_folder(args)
     task = get_task(args)
 
     trainer = Trainer(logger=[get_tb_logger(save_dir, exp_name), get_csv_logger(save_dir, exp_name)],
