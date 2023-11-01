@@ -2,7 +2,7 @@ import logging
 import numpy as np
 import pytorch_lightning as pl
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 import torch.nn as nn
 import cv2
 import csv
@@ -67,7 +67,7 @@ class HeightEstimationTask(pl.LightningModule):
         
         loss = self.supervised_loss(logits, y)
 
-        self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True )
+        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True )
 
         return loss
 
@@ -112,7 +112,9 @@ class HeightEstimationTask(pl.LightningModule):
         logits = self.forward(x)
       
         loss = self.supervised_loss(logits, y)
-        self.log('val_loss', loss)
+        
+        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True )
+
         self.val_step_outputs.append(loss)
 
         
@@ -194,6 +196,7 @@ class HeightEstimationTask(pl.LightningModule):
         ds = EstimationDataset(self.ds_meta, 'train')
         return DataLoader(ds,
                           batch_size=self.hparams['batch_size'],num_workers=4)
+
 
     def val_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'val')

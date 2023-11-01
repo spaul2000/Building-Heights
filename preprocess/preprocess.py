@@ -118,7 +118,7 @@ def main(bucket_name = 'cs325b-building-height',
     bands_to_keep = [1, 2, 15, 16, 17],
     mask_band = [36],
     n = 2744,  # Number of geotiffs to read and preprocess
-    data_output_folder = "/home/Duke/data/full_tx_2000_mean_vv_vh_rgb"
+    data_output_folder = "/home/spaul/data/full_tx_2000_mean_vv_vh_rgb"
     ):
     # Call the reading and preprocessing function
     read_and_preprocess_n_geotiffs_from_gcs(bucket_name, folder_path, n, bands_to_keep, mask_band, data_output_folder)
