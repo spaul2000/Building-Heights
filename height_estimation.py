@@ -44,7 +44,7 @@ def train(save_dir=str(C.SANDBOX_PATH),
     logging.getLogger().setLevel(logging.INFO)
 
     args = Args(locals())
-    # init_exp_folder(args)
+    init_exp_folder(args)  
     task = get_task(args)
     # task.to('cuda')
 

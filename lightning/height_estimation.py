@@ -160,7 +160,7 @@ class HeightEstimationTask(pl.LightningModule):
             transforms.ToPILImage()(x[i, -3:, :, :]).save(img_path)
             np.save(mask_path, y[i, 0, :, :].cpu().numpy())
             np.save(logits_path, logits[i].cpu().numpy())
-            breakpoint()
+            # breakpoint()
             # Append paths to list
             output_paths.append({
                 'img_path': img_path,
@@ -193,13 +193,13 @@ class HeightEstimationTask(pl.LightningModule):
     def train_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'train')
         return DataLoader(ds,
-                          batch_size=self.hparams['batch_size'],num_workers=8)
+                          batch_size=self.hparams['batch_size'],num_workers=4)
 
     def val_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'val')
         return DataLoader(ds, 
-                          batch_size=self.hparams['batch_size'],num_workers=8)
+                          batch_size=self.hparams['batch_size'],num_workers=4)
 
     def test_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'test')
-        return DataLoader(ds, batch_size=self.hparams['batch_size'],num_workers=8)
+        return DataLoader(ds, batch_size=self.hparams['batch_size'],num_workers=4)
