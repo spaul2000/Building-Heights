@@ -44,20 +44,21 @@ def train(save_dir=str(C.SANDBOX_PATH),
     logging.getLogger().setLevel(logging.INFO)
 
     args = Args(locals())
-    init_exp_folder(args)
+    init_exp_folder(args)  
     task = get_task(args)
+    # task.to('cuda')
 
     trainer = Trainer(logger=[get_tb_logger(save_dir, exp_name), get_csv_logger(save_dir, exp_name)],
                       callbacks=[get_early_stop_callback(patience, monitor="val_loss", mode="min"),
                                  get_ckpt_callback(save_dir, exp_name, monitor="val_loss", mode="min")],
                       log_every_n_steps=1,
-                      max_epochs=1000
+                      max_epochs=1000,accelerator="gpu", devices=1
                      )
     trainer.fit(task)
 
     return trainer.checkpoint_callback.best_model_path
 
-def test(ckpt_path='/home/spaul/group/main/sandbox/real_initial_go/ckpts/model_checkpoint.ckpt',
+def test(ckpt_path='/home/Duke/group/main/sandbox/real_initial_go/ckpts/model_checkpoint.ckpt',
          eval_split='test',
          **kwargs):
     """

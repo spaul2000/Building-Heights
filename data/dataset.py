@@ -40,10 +40,12 @@ class EstimationDataset(torch.utils.data.Dataset):
         with rasterio.open(self._image_path[index]) as src:
             im_np = src.read()
             im = torch.from_numpy(im_np).float()
+            im[torch.isnan(im)] = 0  # Replace nans with 0s
 
         with rasterio.open(self._label[index]) as src:
             label_np = src.read()
             label = torch.from_numpy(label_np).float()
+            label[torch.isnan(label)] = 0  # Replace nans with 0s
 
         return {
             'im': im,
