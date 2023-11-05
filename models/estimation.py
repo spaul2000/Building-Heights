@@ -31,7 +31,7 @@ class SegNet(nn.Module):
                                        classes=1,
                                        encoder_name=backbone,
                                        decoder_channels=C.UNET_DECOD)
-            summary(self.model, input_size=(5,128,128))
+            # summary(self.model, input_size=(5,128,128))
 
     def forward(self, x):
         return self.model(x)

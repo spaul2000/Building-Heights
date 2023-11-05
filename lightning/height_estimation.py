@@ -30,6 +30,8 @@ class HeightEstimationTask(pl.LightningModule):
         self.ds_meta, n_bands = C.EST_DS[ds_name]
         print(params)
         self.model = get_est_model(params, n_bands=n_bands)
+        self.current_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = self.model.to(self.current_device)
         self.supervised_loss = get_loss_fn(params)
 
         self.training_step_outputs = []   # save outputs in each batch to compute metric overall epoch
@@ -57,8 +59,8 @@ class HeightEstimationTask(pl.LightningModule):
 
     def training_step(self, batch: dict, batch_nb: int
                       ) -> torch.FloatTensor:
-        x = batch['im']
-        y = batch['mask']
+        x = batch['im'].to(self.device)
+        y = batch['mask'].to(self.device)
 
 
         logits = self.forward(x)
@@ -81,8 +83,12 @@ class HeightEstimationTask(pl.LightningModule):
 
             # Use a colormap to color the mask and predictions
             cm = plt.get_cmap('jet')
-            mask_colored = torch.tensor(cm(mask)[..., :3])  # Get the RGB channels
-            pred_colored = torch.tensor(cm(pred)[..., :3])  # Get the RGB channels
+            mask_np = mask.cpu().numpy()
+            mask_colored_np = cm(mask_np)[..., :3]  # This gives a numpy array
+            mask_colored = torch.tensor(mask_colored_np).to(device=mask.device)
+            pred_np = pred.cpu().numpy()
+            pred_colored_np = cm(pred_np)[..., :3]  # This gives a numpy array
+            pred_colored = torch.tensor(pred_colored_np).to(device=pred.device)
 
             # Stack the original RGB image, mask, and prediction along the width dimension
             triplet = torch.cat([
@@ -156,7 +162,7 @@ class HeightEstimationTask(pl.LightningModule):
             transforms.ToPILImage()(x[i, -3:, :, :]).save(img_path)
             np.save(mask_path, y[i, 0, :, :].cpu().numpy())
             np.save(logits_path, logits[i].cpu().numpy())
-            breakpoint()
+            # breakpoint()
             # Append paths to list
             output_paths.append({
                 'img_path': img_path,
@@ -187,22 +193,16 @@ class HeightEstimationTask(pl.LightningModule):
         }
 
     def train_dataloader(self) -> DataLoader:
-        full_dataset = EstimationDataset(self.ds_meta, 'train')
-        # max_samples = 1000
-        # if len(full_dataset) > max_samples:
-        #     subset_indices = list(range(max_samples))
-        #     train_subset = Subset(full_dataset, subset_indices)
-        # else:
-        #     train_subset = full_dataset
+        ds = EstimationDataset(self.ds_meta, 'train')
+        return DataLoader(ds,
+                          batch_size=self.hparams['batch_size'],num_workers=4)
 
-        return DataLoader(full_dataset,
-                          batch_size=self.hparams['batch_size'])
 
     def val_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'val')
         return DataLoader(ds, 
-                          batch_size=self.hparams['batch_size'])
+                          batch_size=self.hparams['batch_size'],num_workers=4)
 
     def test_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'test')
-        return DataLoader(ds, batch_size=self.hparams['batch_size'])
+        return DataLoader(ds, batch_size=self.hparams['batch_size'],num_workers=4)
