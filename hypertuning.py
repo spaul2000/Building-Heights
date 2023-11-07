@@ -30,7 +30,7 @@ def train_tune(config, save_dir=str(C.SANDBOX_PATH),
           seg_dataset="inital_test",
           loss_fn='MSE',
           optimizer='Adam',  # Options: 'Adam', 'SGD', 'AdamW'
-          patience=10,
+          patience=5,
          ):
     """
     Run the training experiment.
@@ -48,7 +48,7 @@ def train_tune(config, save_dir=str(C.SANDBOX_PATH),
     seg_backbone = config["seg_backbone"] if seg_backbone is None else seg_backbone
     learning_rate = config["learning_rate"] if learning_rate is None else learning_rate
     batch_size = config["batch_size"] if batch_size is None else batch_size
-    exp_name = f"{seg_backbone}_lr{learning_rate}_bs{batch_size}" if exp_name is None else exp_name
+    exp_name = f"{seg_backbone}_lr{learning_rate:.3e}_bs{batch_size}" if exp_name is None else exp_name
 
     args = Args(locals())
     init_exp_folder(args)
@@ -94,9 +94,9 @@ def test(ckpt_path='/home/Duke/group/main/sandbox/real_initial_go/ckpts/model_ch
 
 def tune_hyperparameters(num_samples=10, max_num_epochs=100, gpus_per_trial=1):
     config = {
-    "learning_rate": tune.loguniform(1e-5, 1e-1),
-    "batch_size": tune.choice([2, 4, 8, 16]),
-    "seg_backbone": tune.choice(["resnet18", "resnet34", "resnet50"]),
+    "learning_rate": tune.loguniform(1e-5, 1e-3),
+    "batch_size": tune.choice([4, 8, 16]),
+    "seg_backbone": tune.choice(["resnet50",'resnet34']),
     }
     search_alg = HyperOptSearch(metric="val_loss", mode="min")
     scheduler = ASHAScheduler(
