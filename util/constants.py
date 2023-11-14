@@ -2,7 +2,7 @@
 from pathlib import Path
 
 # Main paths
-PROJECT_DIR = Path('/home/Duke/group/main')
+PROJECT_DIR = Path('/home/Duke/group/minor')
 
 
 SANDBOX_PATH = PROJECT_DIR / "sandbox"
@@ -16,5 +16,8 @@ EST_DS = {
         5
     )
 }
+
+NUM_S1 = 2
+NUM_S2 = 3
 
 UNET_DECOD = [256, 128, 64, 32, 16]

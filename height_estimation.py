@@ -19,9 +19,9 @@ from lightning import (get_task,
 def train(save_dir=str(C.SANDBOX_PATH),
           tb_path=str(C.TB_PATH),
           task='height_estimation',
-          exp_name="deletesoon2",
+          exp_name="dual-resnet50",
           seg_architecture="UNet",
-          seg_backbone="resnet18",
+          seg_backbone="resnet50",
           seg_dataset="inital_test",
 	      learning_rate=0.0001,
 	      batch_size=4,
@@ -58,7 +58,7 @@ def train(save_dir=str(C.SANDBOX_PATH),
 
     return trainer.checkpoint_callback.best_model_path
 
-def test(ckpt_path='/home/Duke/group/main/sandbox/real_initial_go/ckpts/model_checkpoint.ckpt',
+def test(ckpt_path='/home/Duke/group/main/sandbox/vgg16_lr0.0008909465453111635_bs4/ckpts/epoch=36-step=158619.ckpt',
          eval_split='test',
          **kwargs):
     """

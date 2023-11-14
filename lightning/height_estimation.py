@@ -8,7 +8,7 @@ import cv2
 import csv
 from data import EstimationDataset
 from eval import get_loss_fn
-from models import get_est_model
+from models import *
 from util import constants as C
 from util import util
 import matplotlib.pyplot as plt
@@ -28,8 +28,13 @@ class HeightEstimationTask(pl.LightningModule):
 
         ds_name = self.hparams['seg_dataset']
         self.ds_meta, n_bands = C.EST_DS[ds_name]
+        n_s1 = C.NUM_S1
+        n_s2 = C.NUM_S2
         print(params)
+        # Unet traditional Architecture
         self.model = get_est_model(params, n_bands=n_bands)
+        # Dual Branch Unet Architecture
+        # self.model = get_dual_model(params, n_s1=n_s1, n_s2=n_s2)
         self.current_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.model.to(self.current_device)
         self.supervised_loss = get_loss_fn(params)
@@ -148,9 +153,9 @@ class HeightEstimationTask(pl.LightningModule):
         
         for i in range(x.size(0)):  # Loop through each item in the batch
             # Define paths
-            img_path = f"test_results/images/img_{batch_nb}_{i}.png"
-            mask_path = f"test_results/masks/mask_{batch_nb}_{i}.npy"
-            logits_path = f"test_results/logits/logits_{batch_nb}_{i}.npy"
+            img_path = f"/home/Duke/test_results/images/img_{batch_nb}_{i}.png"
+            mask_path = f"/home/Duke/test_results/masks/mask_{batch_nb}_{i}.npy"
+            logits_path = f"/home/Duke/test_results/logits/logits_{batch_nb}_{i}.npy"
             
             os.makedirs(os.path.dirname(img_path), exist_ok=True)
             os.makedirs(os.path.dirname(mask_path), exist_ok=True)
@@ -179,7 +184,7 @@ class HeightEstimationTask(pl.LightningModule):
         self.log('test_loss', test_loss)
         
         # Writing to CSV
-        with open('test_results/results.csv', mode='w', newline='') as file:
+        with open('/home/Duke/test_results/results.csv', mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["Image Path", "Logits Path", "Mask Path", "Error"])  # Writing header
             for output in self.test_path_outputs:
