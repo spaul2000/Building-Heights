@@ -2,6 +2,7 @@ import argparse
 
 from util import Args
 from .estimation import *
+from .dual_estimation import *
 
 
 
@@ -16,3 +17,7 @@ def get_model(model_args):
 def get_est_model(params: dict, n_bands: int
                  ) -> nn.Module:
     return SegNet(params['seg_architecture'], params['seg_backbone'], n_bands)
+
+def get_dual_model(params: dict, n_s1: int, n_s2: int
+                 ) -> nn.Module:
+    return DualBranchUnet(params['seg_backbone'], n_s1, n_s2)
