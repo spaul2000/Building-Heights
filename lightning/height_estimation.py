@@ -66,8 +66,8 @@ class HeightEstimationTask(pl.LightningModule):
         logits = self.forward(x)
         
         loss = self.supervised_loss(logits, y)
-
-        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True )
+        if loss is not None:
+            self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True )
 
         return loss
 
@@ -112,14 +112,14 @@ class HeightEstimationTask(pl.LightningModule):
         logits = self.forward(x)
       
         loss = self.supervised_loss(logits, y)
+        if loss is not None:
+            self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True )
+
+            self.val_step_outputs.append(loss)
+
         
-        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True )
 
-        self.val_step_outputs.append(loss)
-
-        
-
-        self.log_images_to_tensorboard(x[:1], y[:1], logits[:1], self.current_epoch)
+        # self.log_images_to_tensorboard(x[:1], y[:1], logits[:1], self.current_epoch)
 
         return {
             'val_loss': loss
@@ -150,9 +150,9 @@ class HeightEstimationTask(pl.LightningModule):
         
         for i in range(x.size(0)):  # Loop through each item in the batch
             # Define paths
-            img_path = f"test_results/images/img_{batch_nb}_{i}.png"
-            mask_path = f"test_results/masks/mask_{batch_nb}_{i}.npy"
-            logits_path = f"test_results/logits/logits_{batch_nb}_{i}.npy"
+            img_path = f"test_results3/images/img_{batch_nb}_{i}.png"
+            mask_path = f"test_results3/masks/mask_{batch_nb}_{i}.npy"
+            logits_path = f"test_results3/logits/logits_{batch_nb}_{i}.npy"
             
             os.makedirs(os.path.dirname(img_path), exist_ok=True)
             os.makedirs(os.path.dirname(mask_path), exist_ok=True)
@@ -181,7 +181,7 @@ class HeightEstimationTask(pl.LightningModule):
         self.log('test_loss', test_loss)
         
         # Writing to CSV
-        with open('test_results/results.csv', mode='w', newline='') as file:
+        with open('test_results3/results.csv', mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["Image Path", "Logits Path", "Mask Path", "Error"])  # Writing header
             for output in self.test_path_outputs:
@@ -195,14 +195,15 @@ class HeightEstimationTask(pl.LightningModule):
     def train_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'train')
         return DataLoader(ds,
-                          batch_size=self.hparams['batch_size'],num_workers=4)
+                          batch_size=self.hparams['batch_size'],num_workers=0)
 
 
     def val_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'val')
         return DataLoader(ds, 
-                          batch_size=self.hparams['batch_size'],num_workers=4)
+                          batch_size=self.hparams['batch_size'],num_workers=0)
 
     def test_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'test')
-        return DataLoader(ds, batch_size=self.hparams['batch_size'],num_workers=4)
+        ds_subset = Subset(ds, indices=range(20))
+        return DataLoader(ds_subset, batch_size=self.hparams['batch_size'],num_workers=0)
