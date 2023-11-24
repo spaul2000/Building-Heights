@@ -32,9 +32,9 @@ class HeightEstimationTask(pl.LightningModule):
         n_s2 = C.NUM_S2
         print(params)
         # Unet traditional Architecture
-        self.model = get_est_model(params, n_bands=n_bands)
+        # self.model = get_est_model(params, n_bands=n_bands)
         # Dual Branch Unet Architecture
-        # self.model = get_dual_model(params, n_s1=n_s1, n_s2=n_s2)
+        self.model = get_dual_model(params, n_s1=n_s1, n_s2=n_s2)
         self.current_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.model.to(self.current_device)
         self.supervised_loss = get_loss_fn(params)

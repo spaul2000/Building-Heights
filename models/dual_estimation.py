@@ -8,14 +8,15 @@ from util import constants as C
 
 class DualBranchUnet(Unet):
 
-    def __init__(self, 
+    def __init__(self,
+                 main_backbone: str, 
                  backbone: str, 
                  in_channels_s1: int, 
                  in_channels_s2: int,  
                  **kwargs
                  ):
         # Initialize the Unet with combined channels
-        super().__init__(encoder_name=backbone,
+        super().__init__(encoder_name=main_backbone,
                          in_channels=in_channels_s1+in_channels_s2, 
                          classes=1, 
                          decoder_channels=C.UNET_DECOD,
@@ -25,7 +26,7 @@ class DualBranchUnet(Unet):
         # Initialize separate encoders for S1 and S2
         self.encoder_s1 = get_encoder(backbone, in_channels=in_channels_s1)
         self.encoder_s2 = get_encoder(backbone, in_channels=in_channels_s2)
-        self.encoder = get_encoder(backbone, in_channels=in_channels_s1+in_channels_s2)
+        self.encoder = get_encoder(main_backbone, in_channels=in_channels_s1+in_channels_s2)
 
         # Modify the original decoder_channels to match the combined encoder channels
         combined_encoder_channels = [
