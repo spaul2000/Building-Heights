@@ -72,7 +72,9 @@ class HeightEstimationTask(pl.LightningModule):
         
         loss = self.supervised_loss(logits, y)
 
-        self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True )
+        if loss is not None:
+            self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+
 
         return loss
 
@@ -117,7 +119,9 @@ class HeightEstimationTask(pl.LightningModule):
         logits = self.forward(x)
       
         loss = self.supervised_loss(logits, y)
-        self.log('val_loss', loss)
+        if loss is not None:
+            self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+
         self.val_step_outputs.append(loss)
 
         

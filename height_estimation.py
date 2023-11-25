@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from pytorch_lightning import Trainer
+from torchsummary import summary
 
 from util import constants as C
 from util import init_exp_folder, Args
@@ -19,14 +20,15 @@ from lightning import (get_task,
 def train(save_dir=str(C.SANDBOX_PATH),
           tb_path=str(C.TB_PATH),
           task='height_estimation',
-          exp_name="dual-vision-transformer",
+          exp_name="dual-resnet50-WeightedMSE",
           seg_architecture="UNet",
-          fake_backbone="resnet18",
-          seg_backbone="mit_b1",
+          main_backbone="resnet50",
+          s1_backbone="resnet50",
+          s2_backbone="resnet50",
           seg_dataset="inital_test",
 	      learning_rate=0.0001,
 	      batch_size=4,
-          loss_fn='MSE',
+          loss_fn='WeightedMSE',
           optimizer='Adam',  # Options: 'Adam', 'SGD', 'AdamW'
           patience=10,
          ):
@@ -59,7 +61,7 @@ def train(save_dir=str(C.SANDBOX_PATH),
 
     return trainer.checkpoint_callback.best_model_path
 
-def test(ckpt_path='/home/Duke/group/main/sandbox/vgg16_lr0.0008909465453111635_bs4/ckpts/epoch=36-step=158619.ckpt',
+def test(ckpt_path='/home/Duke/group/minor/sandbox/dual-resnet50-WeightedMSE/ckpts/epoch=29-step=128610.ckpt',
          eval_split='test',
          **kwargs):
     """
