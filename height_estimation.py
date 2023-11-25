@@ -19,13 +19,13 @@ from lightning import (get_task,
 def train(save_dir=str(C.SANDBOX_PATH),
           tb_path=str(C.TB_PATH),
           task='height_estimation',
-          exp_name="baseline_weighted_loss_x1.2_lr.0001",
+          exp_name="test-dual-resnet50",
           seg_architecture="UNet",
           seg_backbone="resnet18",
           seg_dataset="inital_test",
 	      learning_rate=0.0001,
 	      batch_size=4,
-          loss_fn='MSE',
+          loss_fn='BuildingMSE',
           optimizer='Adam',  # Options: 'Adam', 'SGD', 'AdamW'
           patience=10,
          ):
@@ -58,7 +58,7 @@ def train(save_dir=str(C.SANDBOX_PATH),
 
     return trainer.checkpoint_callback.best_model_path
 
-def test(ckpt_path='/home/Duke/group/main/sandbox/real_initial_go/ckpts/model_checkpoint.ckpt',
+def test(ckpt_path='group/minor/sandbox/dual-resnet50/ckpts/epoch=14-step=64305.ckpt',
          eval_split='test',
          **kwargs):
     """
