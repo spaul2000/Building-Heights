@@ -61,7 +61,7 @@ def train(save_dir=str(C.SANDBOX_PATH),
 
     return trainer.checkpoint_callback.best_model_path
 
-def test(ckpt_path='/home/Duke/group/minor/sandbox/dual-resnet50-WeightedMSE/ckpts/epoch=29-step=128610.ckpt',
+def test(ckpt_path='/home/Duke/group/minor/sandbox/dual-vision-transformer/ckpts/epoch=56-step=244359.ckpt',
          eval_split='test',
          **kwargs):
     """

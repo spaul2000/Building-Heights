@@ -11,12 +11,12 @@ TB_PATH = PROJECT_DIR / "tb"
 EST_DS = {
     'inital_test': (
         # Path to metadata csv
-        '/home/Duke/data/full_tx_2000_mean_vv_vh_rgb/metadata.csv',
+        '/mnt/mydisk/Duke/LA',
         # Number of input bands
-        5,
+        6,
     )
 }
-NUM_S1 = 2
+NUM_S1 = 3
 NUM_S2 = 3
 
 UNET_DECOD = [256, 128, 64, 32, 16]
