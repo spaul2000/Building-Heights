@@ -30,7 +30,7 @@ def train(save_dir=str(C.SANDBOX_PATH),
 	      batch_size=4,
           loss_fn='WeightedMSE',
           optimizer='Adam',  # Options: 'Adam', 'SGD', 'AdamW'
-          patience=10,
+          patience=5,
          ):
     """
     Run the training experiment.

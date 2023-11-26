@@ -2,7 +2,7 @@ import logging
 import numpy as np
 import pytorch_lightning as pl
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Subset
 import torch.nn as nn
 import cv2
 import csv
@@ -203,6 +203,7 @@ class HeightEstimationTask(pl.LightningModule):
         ds = EstimationDataset(self.ds_meta, 'train')
         return DataLoader(ds,
                           batch_size=self.hparams['batch_size'],num_workers=4)
+
 
     def val_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'val')
