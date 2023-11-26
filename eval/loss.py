@@ -84,7 +84,7 @@ def get_loss_fn(loss_args):
     loss_fn = loss_args_.get("loss_fn")
 
     if loss_fn == "MSE":
-        return custom_weighted_mse_loss  # Return the custom loss function
+        return custom_mse_loss  # Return the custom loss function
     elif loss_fn == "BuildingMSE":
         return building_mse_loss
     elif loss_fn == "WeightedMSE":
