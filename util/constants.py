@@ -13,7 +13,7 @@ EST_DS = {
         # Path to metadata csv
         '/home/Duke/data/full_tx_2000_mean_vv_vh_rgb/metadata.csv',
         # Number of input bands
-        5
+        5,
     )
 }
 NUM_S1 = 2
