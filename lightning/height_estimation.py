@@ -201,14 +201,13 @@ class HeightEstimationTask(pl.LightningModule):
     def train_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'train')
         return DataLoader(ds,
-                          batch_size=self.hparams['batch_size'], num_workers=0)
+                          batch_size=self.hparams['batch_size'], num_workers=7)
 
     def val_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'val')
         return DataLoader(ds, 
-                          batch_size=self.hparams['batch_size'], num_workers=0)
+                          batch_size=self.hparams['batch_size'], num_workers=7)
 
     def test_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'test')
-        ds_subset = Subset(ds, indices=range(20))
-        return DataLoader(ds_subset, batch_size=self.hparams['batch_size'], num_workers=0)
+        return DataLoader(ds, batch_size=self.hparams['batch_size'], num_workers=7)
