@@ -7,7 +7,7 @@ import torch.nn as nn
 import cv2
 import csv
 from data import EstimationDataset
-from eval import get_loss_fn
+from eval import get_loss_fn, custom_mse_loss, building_mse_loss
 from models import *
 from util import constants as C
 from util import util
@@ -46,6 +46,7 @@ class HeightEstimationTask(pl.LightningModule):
         self.val_step_targets = []        # save targets in each batch to compute metric overall epoch
 
         self.test_loss_outputs = []
+        self.test_building_loss_outputs = []
         self.test_path_outputs = []
 
     def forward(self, x: torch.FloatTensor) -> torch.FloatTensor:
@@ -150,16 +151,23 @@ class HeightEstimationTask(pl.LightningModule):
         logits = self.forward(x)
         logits = logits.reshape(y.shape)
         
-        loss = self.supervised_loss(logits, y)
+        loss = custom_mse_loss(logits, y)
+        building_loss = building_mse_loss(logits, y)
 
         output_paths = []  # List to hold paths of saved files for each item in the batch
         
         for i in range(x.size(0)):  # Loop through each item in the batch
             # Define paths
-            img_path = f"/home/Duke/test_results/images/img_{batch_nb}_{i}.png"
-            mask_path = f"/home/Duke/test_results/masks/mask_{batch_nb}_{i}.npy"
-            logits_path = f"/home/Duke/test_results/logits/logits_{batch_nb}_{i}.npy"
-            
+            img_path = f"~/test_results/images/img_{batch_nb}_{i}.png"
+            mask_path = f"~/test_results/masks/mask_{batch_nb}_{i}.npy"
+            logits_path = f"~/test_results/logits/logits_{batch_nb}_{i}.npy"
+
+            # Expand the user directory in each path
+            img_path = os.path.expanduser(img_path)
+            mask_path = os.path.expanduser(mask_path)
+            logits_path = os.path.expanduser(logits_path)
+
+            # Create directories if they don't exist
             os.makedirs(os.path.dirname(img_path), exist_ok=True)
             os.makedirs(os.path.dirname(mask_path), exist_ok=True)
             os.makedirs(os.path.dirname(logits_path), exist_ok=True)
@@ -176,6 +184,7 @@ class HeightEstimationTask(pl.LightningModule):
                 'logits_path': logits_path,
             })
         self.test_loss_outputs.append(loss)
+        self.test_building_loss_outputs.append(building_loss)
         self.test_path_outputs.extend(output_paths)
         return {
             'output_paths': output_paths,
@@ -183,19 +192,23 @@ class HeightEstimationTask(pl.LightningModule):
         }
 
     def on_test_epoch_end(self):
-        test_loss = torch.tensor([x for x in self.test_loss_outputs]).mean().item()
-        self.log('test_loss', test_loss)
-        
+        total_MSE = torch.tensor([x for x in self.test_loss_outputs]).mean().item()
+        building_MSE = torch.tensor([x for x in self.test_building_loss_outputs]).mean().item()
+        self.log('total_MSE', total_MSE)
+        self.log('total_RMSE', total_MSE**.5)
+        self.log('building_MSE', building_MSE)
+        self.log('building_RMSE', building_MSE**.5)
         # Writing to CSV
-        with open('/home/Duke/test_results/results.csv', mode='w', newline='') as file:
+        with open(os.path.expanduser('~/test_results/results.csv'), mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(["Image Path", "Logits Path", "Mask Path", "Error"])  # Writing header
             for output in self.test_path_outputs:
                     writer.writerow([output['img_path'], output['logits_path'], output['mask_path']])
         
-        print(test_loss)
+        print(total_MSE, building_MSE)
         self.eval_results = {
-            'test_loss': test_loss,
+            'total_MSE': total_MSE,
+            'building_MSE': building_MSE
         }
 
     def train_dataloader(self) -> DataLoader:
@@ -210,5 +223,5 @@ class HeightEstimationTask(pl.LightningModule):
 
     def test_dataloader(self) -> DataLoader:
         ds = EstimationDataset(self.ds_meta, 'test')
-        ds_subset = Subset(ds, indices=range(20))
-        return DataLoader(ds_subset, batch_size=self.hparams['batch_size'], num_workers=0)
+        
+        return DataLoader(ds, batch_size=self.hparams['batch_size'], num_workers=0)
