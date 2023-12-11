@@ -1,0 +1,5 @@
+/Building-Heights/code contains all the code for our project
+
+/Building-Heights/code/height_estimation.py is the main entry point for training and testing
+
+/Building-Heights/code/util/constants.py contains constants that can be modified if needed. The dataset variable may need to be changed if you reconfigure the path to the dataset.
