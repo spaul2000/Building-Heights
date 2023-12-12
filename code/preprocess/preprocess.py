@@ -116,7 +116,7 @@ def save_cropped_tiffs(data_list, mask_list, data_output_folder, profiles, prefi
 
 
 def main(bucket_name = 'cs325b-building-height',
-    folder_path = 'data/sat_img/pa_sample_gt_2000_fixed/',
+    folder_path = 'data/sat_img/tx_sample_gt_2000/',
     bands_to_keep = [1, 2, 14, 15, 16, 17],
     mask_band = [36],
     n = 2744,  # Number of geotiffs to read and preprocess

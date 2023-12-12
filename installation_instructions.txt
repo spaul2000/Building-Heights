@@ -1,3 +1,12 @@
-Create a Google VM machine with at least 2 GPUs. One is needed for training each branch of the dual encoder model. Additionally, the boot disk must be expanded beyond defaults to store the entire dataset.
+Create a Google VM machine with at least 1 GPUs. One is needed for training each branch of the dual encoder model. Additionally, the boot disk must be expanded beyond defaults to store the entire dataset.
 Clone the repository on the VM.
 Create a conda environment from environment.yml or create a fresh conda environment and install packages in requirements.txt. Python 3.8 is required.
+
+The experiment was set up with following configuration: 
+- GPU: 1 x NVIDIA Tesla P4
+- CPU: n1-standard-8
+- IMAGES: Google, Deep Learning VM for PyTorch 2.0 with CUDA 11.8, M112, Debian 11, Python 3.10, with PyTorch 2.0 and fast.ai preinstalled. 
+
+Fast deploying the GPU in VM:
+https://github.com/GoogleCloudPlatform/compute-gpu-installation/tree/main/linux
+Some potential issues might cause by existing CUDA 11.8, delete every NVIDIA related files and rerunning the installation process.
