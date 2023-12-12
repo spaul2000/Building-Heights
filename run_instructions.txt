@@ -17,4 +17,18 @@ python3 code/height_estimation.py test [flags]
 
 separately if they want greater customization. 
 
+To run domain adpatation experiments, users must first preprocess any additional domain datasets by running:
 
+python3 code/preprocess/preprocess.py [folder_path, n, data_output_folder]
+
+They can then create the desired train/val and test combination by running the following, specifying the path to the metadata.csv files of the individual domain datasets:
+
+python3 code/preprocess/domain_adaptation_dataset.py [train_val_domains, test_domains, output_folder]
+
+This will create a metadata.csv file in the output folder, which the user can then update the EST_DST path in util/constants.py to reflect. Finally, the user can run:
+
+python3 code/height_estimation.py train [save_dir, tb_path, exp_name, seg_architecture, main_backbone, s1_backbone, s2_backbone, seg_dataset, learning_rate, batch_size, loss_fn, optimizer, patience]
+
+python3 code/height_estimation.py test [flags]
+
+to train and test on the domain adaptation dataset.
