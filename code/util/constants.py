@@ -1,8 +1,8 @@
 """Define constants to be used throughout the repository."""
 from pathlib import Path
-
+import os 
 # Main paths
-PROJECT_DIR = Path('/home/Duke/group/minor')
+PROJECT_DIR = Path(os.path.expanduser('~/group/main'))
 
 
 SANDBOX_PATH = PROJECT_DIR / "sandbox"
@@ -11,7 +11,7 @@ TB_PATH = PROJECT_DIR / "tb"
 EST_DS = {
     'inital_test': (
         # Path to metadata csv
-        '/mnt/mydisk/Duke/Penn/metadata.csv',
+        '~/data/dual_bands/metadata.csv',
         # Number of input bands
         6,
     )

@@ -1,0 +1,20 @@
+main.sh 
+
+This script will run the preprocessing of our main Texas dataset. This entails downloading the dataset from GCP. 
+The script will then run training of our ViT dual encoder model on the downloaded dataset. Finally, the script will run testing of the model on the downloaded dataset.
+
+We don't allow users to modify arguments specifically in main.sh since that would massively increase complexity. 
+If a user wants to change any of the default arguments passed into code/preprocess/preprocess.py and code/height_estimation.py to modify the downloaded dataset, location of the dataset, train or test parameters, 
+then they should do so directly in those files.
+
+Additionally, a user can run:
+
+python3 code/preprocess/preprocess.py [flags]
+
+python3 code/height_estimation.py train [save_dir, tb_path, exp_name, seg_architecture, main_backbone, s1_backbone, s2_backbone, seg_dataset, learning_rate, batch_size, loss_fn, optimizer, patience]
+
+python3 code/height_estimation.py test [flags]
+
+separately if they want greater customization. 
+
+

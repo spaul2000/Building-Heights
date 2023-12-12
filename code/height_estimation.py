@@ -3,6 +3,7 @@ import os
 import fire
 import numpy as np
 import torch
+import glob
 import torch.nn as nn
 from pytorch_lightning import Trainer
 from torchsummary import summary
@@ -20,9 +21,9 @@ from lightning import (get_task,
 def train(save_dir=str(C.SANDBOX_PATH),
           tb_path=str(C.TB_PATH),
           task='height_estimation',
-          exp_name="ablation_S2_building",
+          exp_name="aaaa",
           seg_architecture="UNet",
-          main_backbone="resnet18",
+          main_backbone="resnet50",
           s1_backbone="mit_b1",
           s2_backbone="mit_b1",
           seg_dataset="inital_test",
@@ -59,9 +60,12 @@ def train(save_dir=str(C.SANDBOX_PATH),
                      )
     trainer.fit(task)
 
-    return trainer.checkpoint_callback.best_model_path
+    dirs = os.path.join(save_dir, exp_name)
+    dirs = os.path.join(dirs, 'ckpts/*')
+    return glob.glob(dirs)[0]
 
-def test(ckpt_path='/home/Duke/group/minor/sandbox/dual-vision-transformer/ckpts/epoch=56-step=244359.ckpt',
+
+def test(ckpt_path='~/group/main/sandbox/final1/ckpts/epoch=27-step=252.ckpt',
          eval_split='test',
          **kwargs):
     """

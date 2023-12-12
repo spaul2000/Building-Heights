@@ -1,0 +1,3 @@
+Create a Google VM machine with at least 2 GPUs. One is needed for training each branch of the dual encoder model. Additionally, the boot disk must be expanded beyond defaults to store the entire dataset.
+Clone the repository on the VM.
+Create a conda environment from environment.yml or create a fresh conda environment and install packages in requirements.txt. Python 3.8 is required.
